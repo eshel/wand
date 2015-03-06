@@ -10,6 +10,8 @@
 #include "MultiBoom.h"
 #include "ModeIndicator.h"
 #include "Button.h"
+#include "TopLight.h"
+#include "Cylon.h"
 
 #if defined(__AVR_ATmega32U4__)
 #define ARDUINO_IS_PRO_MICRO  1
@@ -50,13 +52,21 @@ Walker greenWalker(strip, false);
 Rain rain(strip, true);
 ParticleSystem particles(strip, false);
 MultiBoom boom(strip, true);
+Cylon cylon(strip, false);
+TopLight redLight(strip, buttonC, Color(255, 0, 0), 4, false);
+TopLight greenLight(strip, buttonC, Color(0, 255, 0), 4, false);
+TopLight blueLight(strip, buttonC, Color(0, 0, 255), 4, false);
 
 Animation* s_Animations[] = {
   &disco,
   &rain,  
   &boom,
   &greenWalker,
-  &particles
+  &particles,
+  &redLight,
+  &greenLight,
+  &blueLight,
+  &cylon
 };
 
 
@@ -64,6 +74,7 @@ static const int s_AnimationsCount = sizeof(s_Animations) / sizeof(Animation*);
 
 Animation* s_IdleAnimations[] = {
   &rain,
+  &cylon,
   &disco,
   &greenWalker,
   &particles
@@ -71,7 +82,10 @@ Animation* s_IdleAnimations[] = {
 #define IDLE_COUNT (sizeof(s_IdleAnimations) / sizeof(Animation*))
 
 Animation* s_MotionAnimations[] = {
-  &boom
+  &boom,
+  &redLight,
+  &greenLight,
+  &blueLight,
 };
 #define MOTION_COUNT (sizeof(s_MotionAnimations) / sizeof(Animation*))
 
@@ -220,7 +234,6 @@ void loop() {
     onStep();
   }
 
-  //strip.addAll(-25);
   strip.multAll(4, 5);
 
   bool isModeIndication = false;
