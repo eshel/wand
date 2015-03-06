@@ -19,9 +19,9 @@
 
 #if (ARDUINO_IS_PRO_MICRO)
 Led led(17);
-#define PIN_BUTTON_A  7
+#define PIN_BUTTON_A  9
 #define PIN_BUTTON_B  8
-#define PIN_BUTTON_C  9
+#define PIN_BUTTON_C  7
 #else
 Led led(7);
 #define PIN_BUTTON_A  14
@@ -162,7 +162,9 @@ void setup() {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 
+  led.on();
   delay(5000);
+  led.off();
   
   last_update = millis();
 }
