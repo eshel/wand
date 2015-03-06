@@ -44,33 +44,20 @@
 static const uint16_t s_PinMasks[7] = {
   (1 << 4), 
   (1 << 5),
-  (1 << 6),
-  (1 << 7),
-  (1 << 8),
-  (1 << 9),
-  (1 << 10)
+  (1 << 6)
 };
 #else
 static const uint16_t s_PinMasks[7] = {
   (1 << 0), 
   (1 << 1),
-  (1 << 2),
-  (1 << 3),
-  (1 << 4),
-  (1 << 5),
-  (1 << 6)
+  (1 << 2)
 };
 #endif
 
 static const uint16_t s_PinMaskAll = 
   s_PinMasks[0] |
   s_PinMasks[1] |
-  s_PinMasks[2] |
-  s_PinMasks[3] |
-  s_PinMasks[4] |
-  s_PinMasks[5] |
-  s_PinMasks[6];
-
+  s_PinMasks[2];
 
 const uint32_t MultiNeoPixel::WHITE = MultiNeoPixel::Color(255, 255, 255);
 const uint32_t MultiNeoPixel::RED = MultiNeoPixel::Color(255, 0, 0);

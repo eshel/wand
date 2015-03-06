@@ -47,7 +47,7 @@ typedef enum {
 
 
 #define SPACE_Y_MM    16
-#define SPACE_X_MM    60
+#define SPACE_X_MM    40
 
 class MultiNeoPixel {
 

@@ -3,7 +3,6 @@
 
 #include "Animation.h"
 #include "ColorUtils.h"
-#include "Motion.h"
 
 // HACK - only include this header from one object file!
 const prog_uchar PROGMEM sinetable[256] = {
@@ -28,7 +27,7 @@ const prog_uchar PROGMEM sinetable[256] = {
 
 class Sines : public Animation {
 public:
-	Sines(MultiNeoPixel& strip, Motion& motion, bool active) : Animation(strip, active), mMotion(motion)
+	Sines(MultiNeoPixel& strip, bool active) : Animation(strip, active)
 	{
 	}
 
@@ -65,7 +64,7 @@ public:
 	}
 
 	virtual void update() {
-		int16_t value = mMotion.getSample().apower;
+		int16_t value = 1;
 		mValue = (mValue + value) >> 2;
 	}
 
@@ -74,7 +73,6 @@ public:
 	}
 
 private:
-	Motion& mMotion;
 	int32_t mValue;
 };
 

@@ -1,20 +1,15 @@
 #include "NeoPixelParallel.h"
 #include "Particle.h"
 #include "ColorUtils.h"
-#include "Motion.h"
 #include "Walker.h"
 #include "Animation.h"
 #include "Disco.h"
 #include "Rain.h"
 #include "Led.h"
 #include "Wire.h"
-#include "I2Cdev.h"
-#include "MPU6050.h"
-#include "Sines.h"
 #include "MultiBoom.h"
 #include "ModeIndicator.h"
 #include "Button.h"
-#include "Meter.h"
 
 #if defined(__AVR_ATmega32U4__)
 #define ARDUINO_IS_PRO_MICRO  1
@@ -24,12 +19,14 @@
 
 #if (ARDUINO_IS_PRO_MICRO)
 Led led(17);
-#define PIN_BUTTON_A  14
-#define PIN_BUTTON_B  15
+#define PIN_BUTTON_A  7
+#define PIN_BUTTON_B  8
+#define PIN_BUTTON_C  9
 #else
 Led led(7);
 #define PIN_BUTTON_A  14
 #define PIN_BUTTON_B  15
+#define PIN_BUTTON_C  16
 #endif
 
 
@@ -37,40 +34,29 @@ Led led(7);
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-MultiNeoPixel strip = MultiNeoPixel(7, 16, NEO_GRB + NEO_KHZ800);
+MultiNeoPixel strip = MultiNeoPixel(3, 24, NEO_GRB + NEO_KHZ800);
 
 
 static const uint32_t thresholdMs = 150;
 static const int16_t thresholdG = 1200;
-Motion motionSensor;
 
 
 Button buttonA(PIN_BUTTON_A);
 Button buttonB(PIN_BUTTON_B);
+Button buttonC(PIN_BUTTON_C);
 
 Disco disco(strip, false);
-/*Walker walker1(strip, false);
-Walker walker2(strip, false);
-Walker walker3(strip, false);*/
 Walker greenWalker(strip, false);
 Rain rain(strip, true);
-Sines sines(strip, motionSensor, false);
 ParticleSystem particles(strip, false);
 MultiBoom boom(strip, true);
-Meter accelMeter(strip, motionSensor, true);
-
 
 Animation* s_Animations[] = {
-  &sines,
   &disco,
   &rain,  
   &boom,
-/*  &walker1,
-  &walker2,
-  &walker3,*/
   &greenWalker,
-  &particles,
-  &accelMeter
+  &particles
 };
 
 
@@ -80,14 +66,12 @@ Animation* s_IdleAnimations[] = {
   &rain,
   &disco,
   &greenWalker,
-  &sines,
   &particles
 };
 #define IDLE_COUNT (sizeof(s_IdleAnimations) / sizeof(Animation*))
 
 Animation* s_MotionAnimations[] = {
-  &boom,
-  &accelMeter
+  &boom
 };
 #define MOTION_COUNT (sizeof(s_MotionAnimations) / sizeof(Animation*))
 
@@ -160,10 +144,7 @@ void setup() {
 
   buttonA.begin();
   buttonB.begin();
-
-  motionSensor.begin();
-  bool motionOK = motionSensor.test();
-  Serial.println(motionOK ? "Motion init successful" : "Motion init failed");  
+  buttonC.begin();
 
   greenWalker.setIsWrapping(false);
   greenWalker.setColorHead(128, 255, 255);
@@ -193,6 +174,7 @@ void onStep() {
   }
 }
 
+/*
 void doMotion() {
   // read raw accel/gyro measurements from device
   static uint32_t lastMotionMs = 0;
@@ -210,6 +192,7 @@ void doMotion() {
   }
 
 }
+*/
 
 static uint32_t frame = 0;
 
@@ -228,12 +211,6 @@ void loop() {
     cycleModeB();
     modeA.forceChange();
   }
-
-  motionSensor.sample();
-  //motionSensor.print();
-
-  doMotion();
-
 
   //strip.addAll(-25);
   strip.multAll(4, 5);
