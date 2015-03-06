@@ -201,6 +201,7 @@ void loop() {
 
   buttonA.read();
   buttonB.read();
+  buttonC.read();
 
   if (buttonA.shouldHandleOn()) {
     cycleModeA();
@@ -210,6 +211,11 @@ void loop() {
   if (buttonB.shouldHandleOn()) {
     cycleModeB();
     modeA.forceChange();
+  }
+  
+  led.set(buttonC.isPressed());
+  if (buttonC.shouldHandleOn()) {
+    onStep();
   }
 
   //strip.addAll(-25);
