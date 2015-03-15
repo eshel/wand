@@ -12,6 +12,8 @@
 #include "Button.h"
 #include "TopLight.h"
 #include "Cylon.h"
+#include "StaticColor.h"
+#include "Breath.h"
 
 #if defined(__AVR_ATmega32U4__)
 #define ARDUINO_IS_PRO_MICRO  1
@@ -31,13 +33,14 @@ Led led(7);
 #define PIN_BUTTON_C  16
 #endif
 
+#define ROWS_NUM  24
+#define STRIPS_NUM  3
 
 //   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-MultiNeoPixel strip = MultiNeoPixel(3, 24, NEO_GRB + NEO_KHZ800);
-
+MultiNeoPixel strip = MultiNeoPixel(STRIPS_NUM, ROWS_NUM, NEO_GRB + NEO_KHZ800);
 
 static const uint32_t thresholdMs = 150;
 static const int16_t thresholdG = 1200;
@@ -53,20 +56,45 @@ Rain rain(strip, true);
 ParticleSystem particles(strip, false);
 MultiBoom boom(strip, true);
 Cylon cylon(strip, false);
+
+#define STATIC_LENGTH   ROWS_NUM
+
 TopLight redLight(strip, buttonC, Color(255, 0, 0), 4, false);
 TopLight greenLight(strip, buttonC, Color(0, 255, 0), 4, false);
 TopLight blueLight(strip, buttonC, Color(0, 0, 255), 4, false);
+StaticColor staticRed(strip, Color(255, 0, 0), 0, STATIC_LENGTH, false);
+StaticColor staticGreen(strip, Color(0, 255, 0), 0, STATIC_LENGTH, false);
+StaticColor staticBlue(strip, Color(0, 0, 255), 0, STATIC_LENGTH, false);
+StaticColor staticCyan(strip, Color(0, 190, 190), 0, STATIC_LENGTH, false);
+StaticColor staticYellow(strip, Color(190, 190, 0), 0, STATIC_LENGTH, false);
+StaticColor staticMagenta(strip, Color(190, 0, 190), 0, STATIC_LENGTH, false);
+StaticColor staticDarkRed(strip, Color(40, 0, 0), 0, STATIC_LENGTH, false);
+StaticColor staticDarkGreen(strip, Color(0, 40, 0), 0, STATIC_LENGTH, false);
+StaticColor staticDarkBlue(strip, Color(0, 0, 40), 0, STATIC_LENGTH, false);
+Breath breathPurple(strip, Color(128, 0, 128), 0, STATIC_LENGTH, false);
+Breath breathGreen(strip, Color(0, 128, 128), 0, STATIC_LENGTH, false);
 
 Animation* s_Animations[] = {
   &disco,
   &rain,  
-  &boom,
   &greenWalker,
   &particles,
+  &cylon,
+  &breathPurple,
+  &breathGreen,
+  &staticRed,
+  &staticGreen,
+  &staticBlue,
+  &staticYellow,
+  &staticCyan,
+  &staticMagenta,
+  &staticDarkRed,
+  &staticDarkGreen,
+  &staticDarkBlue,
   &redLight,
   &greenLight,
   &blueLight,
-  &cylon
+  &boom
 };
 
 
@@ -77,7 +105,18 @@ Animation* s_IdleAnimations[] = {
   &cylon,
   &disco,
   &greenWalker,
-  &particles
+  &particles,
+  &breathPurple,
+  &breathGreen,
+  &staticRed,
+  &staticGreen,
+  &staticBlue,
+  &staticYellow,
+  &staticCyan,
+  &staticMagenta,  
+  &staticDarkRed,
+  &staticDarkGreen,
+  &staticDarkBlue,
 };
 #define IDLE_COUNT (sizeof(s_IdleAnimations) / sizeof(Animation*))
 
@@ -93,8 +132,6 @@ Animation* s_MotionAnimations[] = {
 volatile uint8_t modeValA = 0;
 volatile uint8_t modeValB = 0;
 
-#define ROWS_NUM      16
-
 #define MODES_NUM_A   IDLE_COUNT
 #define MODES_NUM_B   (MOTION_COUNT + 1)
 
@@ -106,17 +143,6 @@ volatile uint8_t modeValB = 0;
 
 ModeIndicator modeA(strip, &modeValA, true, MODE_A_FIRST, MODE_A_LAST);
 ModeIndicator modeB(strip, &modeValB, true, MODE_B_FIRST, MODE_B_LAST);
-
-static void cycleModeA() {
-  modeValA = (modeValA + 1) % MODES_NUM_A;
-  setModeA(modeValA);
-}
-
-static void cycleModeB() {
-  modeValB = (modeValB + 1) % MODES_NUM_B;
-  setModeB(modeValB);
-}
-
 
 static void setModeA(uint8_t modeA) {
   for (Animation** a = s_IdleAnimations; a != s_IdleAnimations + IDLE_COUNT; ++a) {
@@ -135,11 +161,17 @@ static void setModeB(uint8_t modeB) {
 }
 
 
+static void cycleModeA() {
+  modeValA = (modeValA + 1) % MODES_NUM_A;
+  setModeA(modeValA);
+}
 
-// IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
-// pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
-// and minimize distance between Arduino and first pixel.  Avoid connecting
-// on a live circuit...if you must, connect GND first.
+static void cycleModeB() {
+  modeValB = (modeValB + 1) % MODES_NUM_B;
+  setModeB(modeValB);
+}
+
+
 
 // Common main-loop state. consider struct/class.
 unsigned long last_update = 0;
@@ -189,26 +221,6 @@ void onStep() {
     boom.explodeOne((float)random(40, 150));
   }
 }
-
-/*
-void doMotion() {
-  // read raw accel/gyro measurements from device
-  static uint32_t lastMotionMs = 0;
-  int16_t apower = motionSensor.getSample().apower;
-
-  if (abs(apower-1024) > thresholdG) {
-    led.on();
-    uint32_t ms = motionSensor.getSample().t;
-    if (ms - lastMotionMs > thresholdMs) {
-      onStep();
-      lastMotionMs = ms;
-    }
-  } else {
-    led.off();
-  }
-
-}
-*/
 
 static uint32_t frame = 0;
 

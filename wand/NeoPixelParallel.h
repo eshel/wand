@@ -16,8 +16,8 @@
   <http://www.gnu.org/licenses/>.
   --------------------------------------------------------------------*/
 
-#ifndef ADAFRUIT_NEOPIXEL_H
-#define ADAFRUIT_NEOPIXEL_H
+#ifndef _NEOPIXELPARALLEL_H_
+#define _NEOPIXELPARALLEL_H_
 
 #if (ARDUINO >= 100)
 #include <Arduino.h>
@@ -373,4 +373,4 @@ public:
 };
 
 
-#endif // ADAFRUIT_NEOPIXEL_H
+#endif // _NEOPIXELPARALLEL_H_

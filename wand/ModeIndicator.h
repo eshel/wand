@@ -19,7 +19,7 @@ public:
 		} else {
 			mHueInterval = 768 / (uint16_t)rowsNum;
 		}
-		mTimeout = 1000;
+		mTimeout = 500;
 		mLuminosity = 255;
 	}
 
