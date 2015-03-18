@@ -20,25 +20,12 @@ public:
 protected:
 	virtual void performDraw() {
 		static uint16_t y = 0;
-		static uint8_t dir = 0;
 
 		for (uint16_t x = 0; x < mStrip.getSizeX(); x++) {
-			mStrip.setPixelColor(x, y, 255, 0, 0);
+			mStrip.setPixelColor(x, y, Wheel((3 * getFrameCount()) % 768));
 		}
 
-		if (dir = 0) {
-			if (y < mStrip.getSizeY() - 1) {
-				y++;
-			} else {
-				dir = 1;
-			}
-		} else {
-			if (y > 0) {
-				y--;
-			} else {
-				dir = 0;
-			}
-		}
+		y = (y + 1) % mStrip.getSizeY();
 	}
 
 };

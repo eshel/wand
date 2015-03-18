@@ -29,8 +29,8 @@ public:
 		return mFrameCount;
 	}
 
-	virtual void begin() = 0;
-	virtual void clear() = 0;
+	virtual void begin() {}
+	virtual void clear() {}
 
 	unsigned long getTime() const {
 		return mTime;

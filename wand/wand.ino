@@ -1,7 +1,6 @@
 #include "NeoPixelParallel.h"
 #include "Particle.h"
 #include "ColorUtils.h"
-#include "Walker.h"
 #include "Animation.h"
 #include "Disco.h"
 #include "Rain.h"
@@ -14,6 +13,7 @@
 #include "Cylon.h"
 #include "StaticColor.h"
 #include "Breath.h"
+#include "Checkers.h"
 
 #if defined(__AVR_ATmega32U4__)
 #define ARDUINO_IS_PRO_MICRO  1
@@ -51,11 +51,11 @@ Button buttonB(PIN_BUTTON_B);
 Button buttonC(PIN_BUTTON_C);
 
 Disco disco(strip, false);
-Walker greenWalker(strip, false);
 Rain rain(strip, true);
 ParticleSystem particles(strip, false);
 MultiBoom boom(strip, true);
 Cylon cylon(strip, false);
+Checkers checkers(strip, false);
 
 #define STATIC_LENGTH   ROWS_NUM
 
@@ -77,9 +77,9 @@ Breath breathGreen(strip, Color(0, 128, 128), 0, STATIC_LENGTH, false);
 Animation* s_Animations[] = {
   &disco,
   &rain,  
-  &greenWalker,
   &particles,
   &cylon,
+  &checkers,
   &breathPurple,
   &breathGreen,
   &staticRed,
@@ -104,7 +104,7 @@ Animation* s_IdleAnimations[] = {
   &rain,
   &cylon,
   &disco,
-  &greenWalker,
+  &checkers,
   &particles,
   &breathPurple,
   &breathGreen,
@@ -192,10 +192,6 @@ void setup() {
   buttonB.begin();
   buttonC.begin();
 
-  greenWalker.setIsWrapping(false);
-  greenWalker.setColorHead(128, 255, 255);
-  greenWalker.setColorTrailHue(0);
-
   for (Animation** a = s_Animations; a != s_Animations + s_AnimationsCount; ++a) {
     (*a)->begin();
   }
@@ -246,7 +242,7 @@ void loop() {
     onStep();
   }
 
-  strip.multAll(4, 5);
+  strip.multAll(7, 10);
 
   bool isModeIndication = false;
 
@@ -269,8 +265,8 @@ void loop() {
   strip.show();
 
   int16_t waitTime = 33 - (int16_t)(millis() - current_time);
-  if (waitTime < 10) {
-    waitTime = 10;  // Minimal delay - necessary!
+  if (waitTime < 5) {
+    waitTime = 5;  // Minimal delay - necessary!
   }
   delay(waitTime); // important to have this!  
 
